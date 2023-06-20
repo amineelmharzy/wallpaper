@@ -1,7 +1,5 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
-// import 'dart:html';
 import 'package:flutter/material.dart';
 import 'collections.dart';
 import 'favorite.dart';
@@ -23,12 +21,12 @@ class Collection extends StatefulWidget {
 class _CollectionState extends State<Collection> {
   int currentIndex = 0;
   List<String> images = [
-    "https://images.pexels.com/photos/1770809/pexels-photo-1770809.jpeg",
-    "https://images.pexels.com/photos/3473541/pexels-photo-3473541.jpeg",
-    "https://images.pexels.com/photos/2255564/pexels-photo-2255564.jpeg",
-    "https://images.pexels.com/photos/2559484/pexels-photo-2559484.jpeg",
-    "https://images.pexels.com/photos/1274260/pexels-photo-1274260.jpeg",
-    "https://images.pexels.com/photos/333525/pexels-photo-333525.jpeg"
+    "https://images.pexels.com/photos/1770809/pexels-photo-1770809.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+    "https://images.pexels.com/photos/3473541/pexels-photo-3473541.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+    "https://images.pexels.com/photos/2255564/pexels-photo-2255564.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+    "https://images.pexels.com/photos/2559484/pexels-photo-2559484.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+    "https://images.pexels.com/photos/1274260/pexels-photo-1274260.jpeg?auto=compress&cs=tinysrgb&w=1600",
+    "https://images.pexels.com/photos/333525/pexels-photo-333525.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
   ];
 
   List<String> titles = ["Nature", "Dark", "Animal", "Sky", "Space", "Travel"];
@@ -38,7 +36,7 @@ class _CollectionState extends State<Collection> {
   void initState() {
     super.initState();
     // Simulate loading delay
-    Future.delayed(Duration(milliseconds: 500), () {
+    Future.delayed(Duration(seconds: 1), () {
       setState(() {
         isLoading = false;
       });

@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_wallpaper_manager/flutter_wallpaper_manager.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:path/path.dart' as p;
@@ -7,7 +8,9 @@ import 'package:image_gallery_saver/image_gallery_saver.dart';
 
 class DownloadingDialog extends StatefulWidget {
   final String url;
-  const DownloadingDialog({Key? key, required this.url}) : super(key: key);
+  final int location;
+  const DownloadingDialog({Key? key, required this.url, required this.location})
+      : super(key: key);
 
   @override
   _DownloadingDialogState createState() => _DownloadingDialogState();
@@ -34,8 +37,11 @@ class _DownloadingDialogState extends State<DownloadingDialog> {
       deleteOnError: true,
     ).then((_) async {
       // Save image to gallery
-      final result = await ImageGallerySaver.saveFile(path);
-
+      if (widget.location == -1)
+        final result = await ImageGallerySaver.saveFile(path);
+      if (widget.location != -1) {
+        WallpaperManager.setWallpaperFromFile(path, widget.location);
+      }
       Navigator.pop(context);
     });
   }
@@ -51,7 +57,6 @@ class _DownloadingDialogState extends State<DownloadingDialog> {
     if (status.isGranted) {
       startDownloading();
     } else if (status.isDenied || !status.isGranted) {
-      print("Hello");
       setState(() {
         showErrorDialog = true;
       });
@@ -103,7 +108,9 @@ class _DownloadingDialogState extends State<DownloadingDialog> {
           CircularProgressIndicator.adaptive(),
           SizedBox(height: 20),
           Text(
-            "Downloading: $downloadingProgress%",
+            widget.location == -1
+                ? "Downloading: $downloadingProgress%"
+                : "Setting Wallpaper",
             style: TextStyle(
               color: Colors.white,
               fontSize: 17,
