@@ -1,5 +1,5 @@
-import 'dart:convert';
-
+import 'package:alex/src/collections.dart';
+import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
 import 'drawer.dart';
 import 'viewimage.dart';
@@ -19,6 +19,7 @@ class Favorite extends StatefulWidget {
 class _FavoriteState extends State<Favorite> {
   int currentIndex = 0;
   bool isLoading = true;
+  bool hasInternet = true; // Replace with your internet connectivity logic
 
   @override
   void initState() {
@@ -27,6 +28,21 @@ class _FavoriteState extends State<Favorite> {
     Future.delayed(Duration(milliseconds: 500), () {
       setState(() {
         isLoading = false;
+      });
+    });
+
+    Connectivity().checkConnectivity().then((connectivityResult) {
+      setState(() {
+        hasInternet =
+            connectivityResult != ConnectivityResult.none ? true : false;
+      });
+    });
+
+    // Subscribe to internet connectivity changes
+    Connectivity().onConnectivityChanged.listen((connectivityResult) {
+      setState(() {
+        hasInternet =
+            connectivityResult != ConnectivityResult.none ? true : false;
       });
     });
   }
@@ -54,6 +70,16 @@ class _FavoriteState extends State<Favorite> {
             Center(
               child: CircularProgressIndicator(
                 color: Colors.indigo[600],
+              ),
+            )
+          else if (!hasInternet)
+            Center(
+              child: Text(
+                'No internet connection',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             )
           else
@@ -122,7 +148,9 @@ class _FavoriteState extends State<Favorite> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => Homepage(),
+                      builder: (context) => Collection(
+                        jsonFileManager: widget.jsonFileManager,
+                      ),
                     ),
                   );
                 }

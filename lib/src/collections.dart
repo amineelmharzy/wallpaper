@@ -1,19 +1,21 @@
-import 'dart:convert';
+import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter/material.dart';
+import 'package:connectivity/connectivity.dart';
+import 'package:transparent_image/transparent_image.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import '../main.dart';
 import 'collections.dart';
 import 'favorite.dart';
 import 'drawer.dart';
 import 'viewimage.dart';
 import 'buttomNarbar.dart';
-import 'package:transparent_image/transparent_image.dart';
-import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-import '../main.dart';
 
 class Collection extends StatefulWidget {
   final JsonFileManager jsonFileManager;
 
-  const Collection({super.key, required this.jsonFileManager});
+  const Collection({Key? key, required this.jsonFileManager}) : super(key: key);
+
   @override
   State<Collection> createState() => _CollectionState();
 }
@@ -26,21 +28,112 @@ class _CollectionState extends State<Collection> {
     "https://images.pexels.com/photos/2255564/pexels-photo-2255564.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
     "https://images.pexels.com/photos/2559484/pexels-photo-2559484.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
     "https://images.pexels.com/photos/1274260/pexels-photo-1274260.jpeg?auto=compress&cs=tinysrgb&w=1600",
-    "https://images.pexels.com/photos/333525/pexels-photo-333525.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
+    "https://images.pexels.com/photos/333525/pexels-photo-333525.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+    "https://images.pexels.com/photos/6153741/pexels-photo-6153741.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
   ];
 
-  List<String> titles = ["Nature", "Dark", "Animal", "Sky", "Space", "Travel"];
+  List<String> titles = [
+    "Nature",
+    "Dark",
+    "Animal",
+    "Sky",
+    "Space",
+    "Travel",
+    "Tech"
+  ];
   bool isLoading = true;
+  bool hasInternet = true; // Replace with your internet connectivity logic
 
   @override
   void initState() {
     super.initState();
     // Simulate loading delay
-    Future.delayed(Duration(seconds: 1), () {
+    Future.delayed(Duration(milliseconds: 1500), () {
       setState(() {
         isLoading = false;
       });
     });
+
+    // Check for internet connectivity
+    Connectivity().checkConnectivity().then((connectivityResult) {
+      setState(() {
+        hasInternet =
+            connectivityResult != ConnectivityResult.none ? true : false;
+      });
+    });
+
+    // Subscribe to internet connectivity changes
+    Connectivity().onConnectivityChanged.listen((connectivityResult) {
+      setState(() {
+        hasInternet =
+            connectivityResult != ConnectivityResult.none ? true : false;
+      });
+    });
+  }
+
+  Widget buildImageWidget(int index) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => Homepage(
+              searchValue: titles[index],
+            ),
+          ),
+        );
+      },
+      child: Stack(
+        children: [
+          Container(
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: Color.fromARGB(0, 0, 0, 0),
+              borderRadius: BorderRadius.all(Radius.circular(15)),
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.all(Radius.circular(15)),
+              child: CachedNetworkImage(
+                placeholder: (context, url) => Container(
+                  color: Colors.grey[200],
+                ),
+                imageUrl: images[index],
+                fit: BoxFit.fitWidth,
+                errorWidget: (context, url, error) => Container(
+                  color: Colors.grey[200],
+                  child: Center(
+                    child: Icon(
+                      Icons.error,
+                      color: Colors.red,
+                      size: 40,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            top: 50,
+            left: 4,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(10.0),
+              child: Container(
+                color: Color.fromRGBO(0, 0, 0, 0.5),
+                padding: EdgeInsets.all(4.0),
+                child: Text(
+                  titles[index],
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 30,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -64,73 +157,34 @@ class _CollectionState extends State<Collection> {
         children: [
           if (isLoading)
             Center(
-                child: CircularProgressIndicator(
-              color: Colors.indigo[600],
-            ))
-          else
+              child: CircularProgressIndicator(
+                color: Colors.indigo[600],
+              ),
+            )
+          else if (hasInternet)
             Container(
               margin: EdgeInsets.all(12),
               child: StaggeredGridView.countBuilder(
-                crossAxisCount: 1,
+                crossAxisCount: 2,
                 crossAxisSpacing: 10,
                 mainAxisSpacing: 12,
                 itemCount: images.length,
                 itemBuilder: (context, index) {
-                  return GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => Homepage(
-                              searchValue: titles[index],
-                            ),
-                          ),
-                        );
-                      },
-                      child: Stack(
-                        children: [
-                          Container(
-                            width: double.infinity,
-                            decoration: BoxDecoration(
-                              color: Color.fromARGB(0, 0, 0, 0),
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(15)),
-                            ),
-                            child: ClipRRect(
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(15)),
-                              child: FadeInImage.memoryNetwork(
-                                placeholder: kTransparentImage,
-                                image: images[index],
-                                fit: BoxFit.fitWidth,
-                              ),
-                            ),
-                          ),
-                          Positioned(
-                            top: 50,
-                            left: 4,
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(10.0),
-                              child: Container(
-                                color: Color.fromRGBO(0, 0, 0, 0.5),
-                                padding: EdgeInsets.all(4.0),
-                                child: Text(
-                                  titles[index],
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 30,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ));
+                  return buildImageWidget(index);
                 },
                 staggeredTileBuilder: (index) {
-                  return StaggeredTile.count(1, index.isEven ? 0.3 : 0.35);
+                  return StaggeredTile.count(1, index.isEven ? 0.9 : 1.2);
                 },
+              ),
+            )
+          else
+            Center(
+              child: Text(
+                'No internet connection',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           Positioned(
@@ -138,27 +192,28 @@ class _CollectionState extends State<Collection> {
             left: 0,
             right: 0,
             child: CustomBottomNavigationBar(
-                currentIndex: 1,
-                onTabTapped: (int index) {
-                  if (index == 0) {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => Homepage(),
+              currentIndex: 1,
+              onTabTapped: (int index) {
+                if (index == 0) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => Homepage(),
+                    ),
+                  );
+                }
+                if (index == 2) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => Favorite(
+                        jsonFileManager: widget.jsonFileManager,
                       ),
-                    );
-                  }
-                  if (index == 2) {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => Favorite(
-                          jsonFileManager: widget.jsonFileManager,
-                        ),
-                      ),
-                    );
-                  }
-                }),
+                    ),
+                  );
+                }
+              },
+            ),
           ),
         ],
       ),

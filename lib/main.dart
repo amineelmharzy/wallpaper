@@ -85,9 +85,80 @@ void main() {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      theme: ThemeData(fontFamily: 'opensans'),
-      home: Homepage(),
+    return WillPopScope(
+      onWillPop: () async {
+        // Add your custom back button logic here
+        if (Navigator.of(context).userGestureInProgress) {
+          // If a user gesture is in progress, allow the default back button behavior
+          return true;
+        } else {
+          // If no user gesture is in progress, handle the back button press
+          // Navigate to the home page and prevent the default back button behavior
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => Homepage()),
+            (route) => false,
+          );
+          return false;
+        }
+      },
+      child: MaterialApp(
+        theme: ThemeData(fontFamily: 'opensans'),
+        home: SplashScreen(),
+        routes: {
+          '/home': (context) => Homepage(),
+        },
+        debugShowCheckedModeBanner: false,
+      ),
+    );
+  }
+}
+
+class SplashScreen extends StatefulWidget {
+  @override
+  _SplashScreenState createState() => _SplashScreenState();
+}
+
+class _SplashScreenState extends State<SplashScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Simulate a time-consuming operation, such as fetching data from an API
+    Future.delayed(Duration(seconds: 2), () {
+      Navigator.pushReplacementNamed(context, '/home');
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Colors.black,
+            ],
+          ),
+        ),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                height: 100,
+                width: 100,
+                child: Image.asset("assets/icons/app.png"),
+              ),
+              SizedBox(height: 16),
+              CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
@@ -226,7 +297,7 @@ class _HomepageState extends State<Homepage> {
         backgroundColor: Colors.black,
         title: Text(
           "Wally",
-          style: TextStyle(fontWeight: FontWeight.bold),
+          // style: TextStyle(fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
       ),
@@ -238,8 +309,8 @@ class _HomepageState extends State<Homepage> {
           Column(
             children: [
               Container(
-                height: 60,
-                margin: EdgeInsets.only(top: 10, left: 30, right: 30),
+                height: 50,
+                margin: EdgeInsets.only(top: 10, left: 20, right: 20),
                 child: CupertinoTextField(
                   prefix: Padding(
                     padding: EdgeInsets.only(left: 8.0),

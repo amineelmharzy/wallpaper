@@ -1,9 +1,14 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
+import 'package:share/share.dart';
 import '../main.dart';
 import 'collections.dart';
 import 'favorite.dart';
+
+class ShareHelper {
+  static void shareMessage(String message) {
+    Share.share(message);
+  }
+}
 
 class Menu extends StatefulWidget {
   final int currentIndex;
@@ -125,9 +130,14 @@ class _MenuState extends State<Menu> {
           selected: widget.currentIndex == 2,
         ),
         ListTile(
-          leading: Icon(
-            Icons.send,
-            color: widget.currentIndex == 2 ? Colors.indigo[600] : Colors.black,
+          leading: Container(
+            width: 22,
+            height: 22,
+            child: Image.asset(
+              'assets/icons/send.png',
+              color:
+                  widget.currentIndex == 3 ? Colors.indigo[600] : Colors.black,
+            ),
           ),
           title: Text(
             'Share',
@@ -135,24 +145,14 @@ class _MenuState extends State<Menu> {
               fontSize: 17,
               fontWeight: FontWeight.bold,
               color:
-                  widget.currentIndex == 2 ? Colors.indigo[600] : Colors.black,
+                  widget.currentIndex == 3 ? Colors.indigo[600] : Colors.black,
             ),
           ),
           onTap: () {
-            if (widget.currentIndex != 2) {
-              Navigator.pop(context);
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => Favorite(
-                          jsonFileManager: widget.jsonFileManager,
-                        )),
-              );
-            } else {
-              Navigator.pop(context);
-            }
+            String message = "Applink";
+            ShareHelper.shareMessage(message);
           },
-          selected: widget.currentIndex == 2,
+          selected: widget.currentIndex == 3,
         ),
         ListTile(
           leading: Icon(

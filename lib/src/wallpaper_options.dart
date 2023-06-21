@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_wallpaper_manager/flutter_wallpaper_manager.dart';
 
 import 'download.dart';
 
@@ -38,7 +39,7 @@ class _ButtonListState extends State<ButtonList> {
                     context: context,
                     builder: (BuildContext context) => DownloadingDialog(
                       url: widget.url,
-                      location: 0,
+                      location: WallpaperManager.LOCK_SCREEN,
                     ),
                   );
                   hideButtonList(); // Hide the button list
@@ -70,7 +71,7 @@ class _ButtonListState extends State<ButtonList> {
                     context: context,
                     builder: (BuildContext context) => DownloadingDialog(
                       url: widget.url,
-                      location: 1,
+                      location: WallpaperManager.HOME_SCREEN,
                     ),
                   );
                   // Add your logic here for the home screen button
@@ -103,7 +104,7 @@ class _ButtonListState extends State<ButtonList> {
                     context: context,
                     builder: (BuildContext context) => DownloadingDialog(
                       url: widget.url,
-                      location: 2,
+                      location: WallpaperManager.BOTH_SCREEN,
                     ),
                   );
                   // Add your logic here for the home screen and lock screen button
