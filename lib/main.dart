@@ -87,13 +87,9 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-        // Add your custom back button logic here
         if (Navigator.of(context).userGestureInProgress) {
-          // If a user gesture is in progress, allow the default back button behavior
           return true;
         } else {
-          // If no user gesture is in progress, handle the back button press
-          // Navigate to the home page and prevent the default back button behavior
           Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute(builder: (context) => Homepage()),
@@ -123,8 +119,13 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    // Simulate a time-consuming operation, such as fetching data from an API
-    Future.delayed(Duration(seconds: 2), () {
+    // Add any necessary initialization tasks or async operations here
+    // For example, you can fetch data from an API or perform other tasks
+    // that are required before showing the main application screen.
+
+    // Simulate a delay using Future.delayed method
+    Future.delayed(Duration(seconds: 3), () {
+      // Navigate to the main application screen after the delay
       Navigator.pushReplacementNamed(context, '/home');
     });
   }
@@ -132,32 +133,10 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Colors.black,
-            ],
-          ),
-        ),
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                height: 100,
-                width: 100,
-                child: Image.asset("assets/icons/app.png"),
-              ),
-              SizedBox(height: 16),
-              CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-              ),
-            ],
-          ),
-        ),
+      backgroundColor: Colors.white, // Set your desired background color
+      body: Center(
+        child: FlutterLogo(
+            size: 150), // Replace this with your own splash screen UI
       ),
     );
   }
@@ -296,7 +275,7 @@ class _HomepageState extends State<Homepage> {
       appBar: AppBar(
         backgroundColor: Colors.black,
         title: Text(
-          "Wally",
+          "Home",
           // style: TextStyle(fontWeight: FontWeight.bold),
         ),
         centerTitle: true,

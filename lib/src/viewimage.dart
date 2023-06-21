@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:alex/main.dart';
 import 'package:alex/src/download.dart';
 import 'package:alex/src/wallpaper_options.dart';
@@ -46,11 +47,10 @@ class _ViewImageState extends State<ViewImage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.black,
         title: Text(
-          'Viewer',
-          style: TextStyle(fontWeight: FontWeight.bold),
+          "Wallpaper",
         ),
+        backgroundColor: Colors.black, // Set the opacity value here
       ),
       body: GestureDetector(
         onTap: () {

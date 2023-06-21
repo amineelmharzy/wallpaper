@@ -1,14 +1,11 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:connectivity/connectivity.dart';
-import 'package:transparent_image/transparent_image.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../main.dart';
-import 'collections.dart';
 import 'favorite.dart';
 import 'drawer.dart';
-import 'viewimage.dart';
 import 'buttomNarbar.dart';
 
 class Collection extends StatefulWidget {
@@ -118,13 +115,13 @@ class _CollectionState extends State<Collection> {
             child: ClipRRect(
               borderRadius: BorderRadius.circular(10.0),
               child: Container(
-                color: Color.fromRGBO(0, 0, 0, 0.5),
+                color: Color.fromRGBO(0, 0, 0, 0.3),
                 padding: EdgeInsets.all(4.0),
                 child: Text(
                   titles[index],
                   style: const TextStyle(
                     color: Colors.white,
-                    fontSize: 30,
+                    fontSize: 20,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
