@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:share/share.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../main.dart';
 import 'collections.dart';
 import 'favorite.dart';
@@ -151,9 +152,11 @@ class _MenuState extends State<Menu> {
           onTap: () {
             String message = "Applink";
             ShareHelper.shareMessage(message);
+            Navigator.pop(context);
           },
           selected: widget.currentIndex == 3,
         ),
+        Divider(),
         ListTile(
           leading: Icon(
             Icons.info,
@@ -168,18 +171,13 @@ class _MenuState extends State<Menu> {
                   widget.currentIndex == 3 ? Colors.indigo[600] : Colors.black,
             ),
           ),
-          onTap: () {
-            if (widget.currentIndex != 3) {
-              Navigator.pop(context);
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => Favorite(
-                          jsonFileManager: widget.jsonFileManager,
-                        )),
-              );
+          onTap: () async {
+            Navigator.pop(context);
+            if (await canLaunch(
+                "https://sites.google.com/view/amine-dev/home")) {
+              await launch("https://sites.google.com/view/amine-dev/home");
             } else {
-              Navigator.pop(context);
+              throw Exception('Could not launch url');
             }
           },
           selected: widget.currentIndex == 3,

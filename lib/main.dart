@@ -8,6 +8,7 @@ import 'package:alex/src/viewimage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:cached_network_image/cached_network_image.dart';
@@ -17,6 +18,7 @@ const String pexelsApiKey =
     'nhyaYthSvv68nZ0kf1YACx7L5u2FyuR98m8ekRfttnO4Y0W4J0Ix4wJT';
 
 List<String> favorites = [];
+int counter = 0;
 
 class PexelsApiClient {
   static const String _baseUrl = 'https://api.pexels.com/v1';
@@ -85,27 +87,26 @@ void main() {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
-        if (Navigator.of(context).userGestureInProgress) {
-          return true;
-        } else {
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (context) => Homepage()),
-            (route) => false,
-          );
-          return false;
-        }
+    return MaterialApp(
+      theme: ThemeData(fontFamily: 'opensans'),
+      home: SplashScreen(),
+      routes: {
+        '/home': (context) => Homepage(),
       },
-      child: MaterialApp(
-        theme: ThemeData(fontFamily: 'opensans'),
-        home: SplashScreen(),
-        routes: {
-          '/home': (context) => Homepage(),
-        },
-        debugShowCheckedModeBanner: false,
-      ),
+      debugShowCheckedModeBanner: false,
+      builder: (BuildContext context, Widget? child) {
+        return WillPopScope(
+          onWillPop: () async {
+            if (Navigator.of(context).userGestureInProgress) {
+              return true;
+            } else {
+              Navigator.pushNamedAndRemoveUntil(context, '/home', (_) => false);
+              return false;
+            }
+          },
+          child: child!,
+        );
+      },
     );
   }
 }
@@ -119,11 +120,6 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    // Add any necessary initialization tasks or async operations here
-    // For example, you can fetch data from an API or perform other tasks
-    // that are required before showing the main application screen.
-
-    // Simulate a delay using Future.delayed method
     Future.delayed(Duration(seconds: 3), () {
       // Navigate to the main application screen after the delay
       Navigator.pushReplacementNamed(context, '/home');
@@ -161,6 +157,8 @@ class _HomepageState extends State<Homepage> {
   late String searchValue;
   ScrollController _scrollController = ScrollController();
   Timer? _debounce;
+  BannerAd? _bannerAd;
+  InterstitialAd? _interstitialAd;
 
   _HomepageState(this.searchValue);
 
@@ -187,6 +185,56 @@ class _HomepageState extends State<Homepage> {
     });
   }
 
+  // void _createInterstitialAd() {
+  //   InterstitialAd.load(
+  //       adUnitId: "ca-app-pub-2084763273619512/7767818268",
+  //       request: AdRequest(),
+  //       adLoadCallback: InterstitialAdLoadCallback(
+  //         onAdLoaded: (InterstitialAd ad) {
+  //           print('$ad loaded');
+  //           _interstitialAd = ad;
+  //           _interstitialAd!.setImmersiveMode(true);
+  //         },
+  //         onAdFailedToLoad: (LoadAdError error) {
+  //           print('InterstitialAd failed to load: $error.');
+  //         },
+  //       ));
+  // }
+
+  // void _showInterstitialAd() {
+  //   if (_interstitialAd == null) {
+  //     print('Warning: attempt to show interstitial before loaded.');
+  //     return;
+  //   }
+  //   _interstitialAd!.fullScreenContentCallback = FullScreenContentCallback(
+  //     onAdShowedFullScreenContent: (InterstitialAd ad) =>
+  //         print('ad onAdShowedFullScreenContent.'),
+  //     onAdDismissedFullScreenContent: (InterstitialAd ad) {
+  //       print('$ad onAdDismissedFullScreenContent.');
+  //       ad.dispose();
+  //       _createInterstitialAd();
+  //     },
+  //     onAdFailedToShowFullScreenContent: (InterstitialAd ad, AdError error) {
+  //       print('$ad onAdFailedToShowFullScreenContent: $error');
+  //       ad.dispose();
+  //       _createInterstitialAd();
+  //     },
+  //   );
+  //   _interstitialAd!.show();
+  //   _interstitialAd = null;
+  // }
+
+  Future<InitializationStatus> _initGoogleMobileAds() {
+    // TODO: Initialize Google Mobile Ads SDK
+    return MobileAds.instance.initialize();
+  }
+
+  @override
+  void dispose() {
+    _bannerAd?.dispose();
+    super.dispose();
+  }
+
   @override
   void initState() {
     super.initState();
@@ -198,6 +246,23 @@ class _HomepageState extends State<Homepage> {
         fetchPexelsImages();
       }
     });
+    BannerAd(
+      adUnitId: 'ca-app-pub-2084763273619512/9437528124',
+      request: AdRequest(),
+      size: AdSize.banner,
+      listener: BannerAdListener(
+        onAdLoaded: (ad) {
+          setState(() {
+            _bannerAd = ad as BannerAd;
+          });
+        },
+        onAdFailedToLoad: (ad, err) {
+          print('Failed to load a banner ad: ${err.message}');
+          ad.dispose();
+        },
+      ),
+    ).load();
+    // _createInterstitialAd();
   }
 
   Future<void> fetchPexelsImages() async {
@@ -269,6 +334,14 @@ class _HomepageState extends State<Homepage> {
     }
   }
 
+  Future<void> _refreshData() async {
+    // Simulate loading delay
+    await Future.delayed(Duration(milliseconds: 1000));
+    setState(() {
+      // Refresh the data here
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -279,127 +352,151 @@ class _HomepageState extends State<Homepage> {
           // style: TextStyle(fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
+        automaticallyImplyLeading: true,
       ),
       drawer: Drawer(
         child: Menu(currentIndex: 0, jsonFileManager: jsonFileManager),
       ),
-      body: Stack(
-        children: [
-          Column(
+      body: RefreshIndicator(
+        onRefresh: _refreshData,
+        child: SafeArea(
+          child: Stack(
             children: [
-              Container(
-                height: 50,
-                margin: EdgeInsets.only(top: 10, left: 20, right: 20),
-                child: CupertinoTextField(
-                  prefix: Padding(
-                    padding: EdgeInsets.only(left: 8.0),
-                    child: Icon(
-                      CupertinoIcons.search,
-                      color: Colors.grey,
+              Column(
+                children: [
+                  Container(
+                    height: 50,
+                    margin: EdgeInsets.only(top: 10, left: 20, right: 20),
+                    child: CupertinoTextField(
+                      prefix: Padding(
+                        padding: EdgeInsets.only(left: 8.0),
+                        child: Icon(
+                          CupertinoIcons.search,
+                          color: Colors.grey,
+                        ),
+                      ),
+                      placeholder: 'Search',
+                      style: TextStyle(fontSize: 18.0),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(10.0),
+                      ),
+                      onChanged: _onSearchChanged,
                     ),
                   ),
-                  placeholder: 'Search',
-                  style: TextStyle(fontSize: 18.0),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(10.0),
-                  ),
-                  onChanged: _onSearchChanged,
-                ),
-              ),
-              Expanded(
-                child: Container(
-                  margin: EdgeInsets.all(12),
-                  child: GridView.builder(
-                    controller: _scrollController,
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      crossAxisSpacing: 10,
-                      mainAxisSpacing: 12,
-                      childAspectRatio:
-                          0.7, // Adjust this value to increase or decrease height
-                    ),
-                    itemCount: _apiImages.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      final imageUrl = _apiImages[index];
+                  Expanded(
+                    child: Container(
+                      margin: EdgeInsets.all(12),
+                      child: GridView.builder(
+                        controller: _scrollController,
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          crossAxisSpacing: 10,
+                          mainAxisSpacing: 12,
+                          childAspectRatio:
+                              0.7, // Adjust this value to increase or decrease height
+                        ),
+                        itemCount: _apiImages.length,
+                        itemBuilder: (BuildContext context, int index) {
+                          final imageUrl = _apiImages[index];
 
-                      return GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => ViewImage(
-                                url: imageUrl,
-                                jsonFileManager: jsonFileManager,
+                          return GestureDetector(
+                            onTap: () {
+                              // _showInterstitialAd();
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => ViewImage(
+                                    url: imageUrl,
+                                    jsonFileManager: jsonFileManager,
+                                  ),
+                                  // builder: (context) => viewImage(url: imageUrl),
+                                ),
+                              );
+                            },
+                            child: Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.all(
+                                  Radius.circular(15.0),
+                                ),
+                                image: DecorationImage(
+                                  image: CachedNetworkImageProvider(imageUrl),
+                                  fit: BoxFit.cover,
+                                ),
                               ),
-                              // builder: (context) => viewImage(url: imageUrl),
                             ),
                           );
-                          print('Tapped item at index $index');
                         },
-                        child: Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.all(
-                              Radius.circular(15.0),
-                            ),
-                            image: DecorationImage(
-                              image: CachedNetworkImageProvider(imageUrl),
-                              fit: BoxFit.cover,
+                      ),
+                    ),
+                  ),
+                  if (isLoading)
+                    Container(
+                      width: double.infinity,
+                      padding: EdgeInsets.all(10),
+                      child: Center(
+                        child: CircularProgressIndicator(),
+                      ),
+                    ),
+                ],
+              ),
+              if (_apiImages.isEmpty && !isLoading)
+                Center(
+                  child: Text(
+                    'No images found',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              Column(
+                children: [
+                  Expanded(
+                    child: SingleChildScrollView(
+                      child: Column(
+                        children: [
+                          // Your content here
+                        ],
+                      ),
+                    ),
+                  ),
+                  if (_bannerAd != null)
+                    Align(
+                      alignment: Alignment.bottomCenter,
+                      child: Container(
+                        width: _bannerAd!.size.width.toDouble(),
+                        height: _bannerAd!.size.height.toDouble(),
+                        child: AdWidget(ad: _bannerAd!),
+                      ),
+                    ),
+                  CustomBottomNavigationBar(
+                    currentIndex: 0,
+                    onTabTapped: (int index) {
+                      if (index == 1) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => Collection(
+                              jsonFileManager: jsonFileManager,
                             ),
                           ),
-                        ),
-                      );
+                        );
+                      }
+                      if (index == 2) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => Favorite(
+                              jsonFileManager: jsonFileManager,
+                            ),
+                          ),
+                        );
+                      }
                     },
                   ),
-                ),
+                ],
               ),
-              if (isLoading)
-                Container(
-                  width: double.infinity,
-                  padding: EdgeInsets.all(10),
-                  child: Center(
-                    child: CircularProgressIndicator(),
-                  ),
-                ),
             ],
           ),
-          if (_apiImages.isEmpty && !isLoading)
-            Center(
-              child: Text(
-                'No images found',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-            ),
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: CustomBottomNavigationBar(
-                currentIndex: 0,
-                onTabTapped: (int index) {
-                  if (index == 1) {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => Collection(
-                          jsonFileManager: jsonFileManager,
-                        ),
-                      ),
-                    );
-                  }
-                  if (index == 2) {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => Favorite(
-                          jsonFileManager: jsonFileManager,
-                        ),
-                      ),
-                    );
-                  }
-                }),
-          ),
-        ],
+        ),
       ),
     );
   }

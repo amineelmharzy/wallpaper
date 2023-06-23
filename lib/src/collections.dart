@@ -1,8 +1,9 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:connectivity/connectivity.dart';
-import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+// import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import '../main.dart';
 import 'favorite.dart';
 import 'drawer.dart';
@@ -101,7 +102,7 @@ class _CollectionState extends State<Collection> {
                   child: Center(
                     child: Icon(
                       Icons.error,
-                      color: Colors.red,
+                      color: Colors.black,
                       size: 40,
                     ),
                   ),
@@ -133,6 +134,14 @@ class _CollectionState extends State<Collection> {
     );
   }
 
+  Future<void> _refreshData() async {
+    // Simulate loading delay
+    await Future.delayed(Duration(milliseconds: 1500));
+    setState(() {
+      // Refresh the data here
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -150,69 +159,72 @@ class _CollectionState extends State<Collection> {
           jsonFileManager: widget.jsonFileManager,
         ),
       ),
-      body: Stack(
-        children: [
-          if (isLoading)
-            Center(
-              child: CircularProgressIndicator(
-                color: Colors.indigo[600],
-              ),
-            )
-          else if (hasInternet)
-            Container(
-              margin: EdgeInsets.all(12),
-              child: StaggeredGridView.countBuilder(
-                crossAxisCount: 2,
-                crossAxisSpacing: 10,
-                mainAxisSpacing: 12,
-                itemCount: images.length,
-                itemBuilder: (context, index) {
-                  return buildImageWidget(index);
-                },
-                staggeredTileBuilder: (index) {
-                  return StaggeredTile.count(1, index.isEven ? 0.9 : 1.2);
-                },
-              ),
-            )
-          else
-            Center(
-              child: Text(
-                'No internet connection',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
+      body: RefreshIndicator(
+        onRefresh: _refreshData,
+        child: Stack(
+          children: [
+            if (isLoading)
+              Center(
+                child: CircularProgressIndicator(
+                  color: Colors.indigo[600],
+                ),
+              )
+            else if (hasInternet)
+              Container(
+                margin: EdgeInsets.all(12),
+                child: StaggeredGridView.countBuilder(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 10,
+                  mainAxisSpacing: 12,
+                  itemCount: images.length,
+                  itemBuilder: (context, index) {
+                    return buildImageWidget(index);
+                  },
+                  staggeredTileBuilder: (index) {
+                    return StaggeredTile.count(1, index.isEven ? 0.9 : 1.2);
+                  },
+                ),
+              )
+            else
+              Center(
+                child: Text(
+                  'No internet connection',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
-            ),
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: CustomBottomNavigationBar(
-              currentIndex: 1,
-              onTabTapped: (int index) {
-                if (index == 0) {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => Homepage(),
-                    ),
-                  );
-                }
-                if (index == 2) {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => Favorite(
-                        jsonFileManager: widget.jsonFileManager,
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: CustomBottomNavigationBar(
+                currentIndex: 1,
+                onTabTapped: (int index) {
+                  if (index == 0) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => Homepage(),
                       ),
-                    ),
-                  );
-                }
-              },
+                    );
+                  }
+                  if (index == 2) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => Favorite(
+                          jsonFileManager: widget.jsonFileManager,
+                        ),
+                      ),
+                    );
+                  }
+                },
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

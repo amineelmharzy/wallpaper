@@ -47,6 +47,14 @@ class _FavoriteState extends State<Favorite> {
     });
   }
 
+  Future<void> _refreshData() async {
+    // Simulate loading delay
+    await Future.delayed(Duration(milliseconds: 1000));
+    setState(() {
+      // Refresh the data here
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -64,100 +72,103 @@ class _FavoriteState extends State<Favorite> {
           jsonFileManager: widget.jsonFileManager,
         ),
       ),
-      body: Stack(
-        children: [
-          if (isLoading)
-            Center(
-              child: CircularProgressIndicator(
-                color: Colors.indigo[600],
-              ),
-            )
-          else if (!hasInternet)
-            Center(
-              child: Text(
-                'No internet connection',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
+      body: RefreshIndicator(
+        onRefresh: _refreshData,
+        child: Stack(
+          children: [
+            if (isLoading)
+              Center(
+                child: CircularProgressIndicator(
+                  color: Colors.indigo[600],
                 ),
-              ),
-            )
-          else
-            Container(
-              margin: EdgeInsets.all(12),
-              child: GridView.builder(
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 10,
-                  mainAxisSpacing: 12,
-                  childAspectRatio: 0.7,
+              )
+            else if (!hasInternet || favorites.isEmpty)
+              Center(
+                child: Text(
+                  !hasInternet ? 'No internet connection' : "No Favorites",
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-                itemCount: favorites.length,
-                itemBuilder: (context, index) {
-                  return GestureDetector(
-                    onTap: () {
-                      // Handle tap event
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => ViewImage(
-                            url: favorites[index],
-                            jsonFileManager: widget.jsonFileManager,
+              )
+            else
+              Container(
+                margin: EdgeInsets.all(12),
+                child: GridView.builder(
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 10,
+                    mainAxisSpacing: 12,
+                    childAspectRatio: 0.7,
+                  ),
+                  itemCount: favorites.length,
+                  itemBuilder: (context, index) {
+                    return GestureDetector(
+                      onTap: () {
+                        // Handle tap event
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ViewImage(
+                              url: favorites[index],
+                              jsonFileManager: widget.jsonFileManager,
+                            ),
+                          ),
+                        );
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.transparent,
+                          borderRadius: BorderRadius.all(
+                            Radius.circular(15),
                           ),
                         ),
-                      );
-                    },
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.transparent,
-                        borderRadius: BorderRadius.all(
-                          Radius.circular(15),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.all(
+                            Radius.circular(15),
+                          ),
+                          child: FadeInImage.memoryNetwork(
+                            placeholder: kTransparentImage,
+                            image: favorites[index],
+                            fit: BoxFit.cover,
+                          ),
                         ),
                       ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.all(
-                          Radius.circular(15),
-                        ),
-                        child: FadeInImage.memoryNetwork(
-                          placeholder: kTransparentImage,
-                          image: favorites[index],
-                          fit: BoxFit.cover,
+                    );
+                  },
+                ),
+              ),
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: CustomBottomNavigationBar(
+                currentIndex: 2,
+                onTabTapped: (int index) {
+                  if (index == 0) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => Homepage(),
+                      ),
+                    );
+                  }
+                  if (index == 1) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => Collection(
+                          jsonFileManager: widget.jsonFileManager,
                         ),
                       ),
-                    ),
-                  );
+                    );
+                  }
                 },
               ),
             ),
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: CustomBottomNavigationBar(
-              currentIndex: 2,
-              onTabTapped: (int index) {
-                if (index == 0) {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => Homepage(),
-                    ),
-                  );
-                }
-                if (index == 1) {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => Collection(
-                        jsonFileManager: widget.jsonFileManager,
-                      ),
-                    ),
-                  );
-                }
-              },
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

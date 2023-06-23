@@ -56,7 +56,7 @@ class _ButtonListState extends State<ButtonList> {
                 ),
                 style: ElevatedButton.styleFrom(
                   foregroundColor: Colors.white70,
-                  backgroundColor: Colors.black87,
+                  backgroundColor: Colors.black,
                   padding: EdgeInsets.zero,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.zero,
@@ -89,7 +89,7 @@ class _ButtonListState extends State<ButtonList> {
                 ),
                 style: ElevatedButton.styleFrom(
                   foregroundColor: Colors.white70,
-                  backgroundColor: Colors.black87,
+                  backgroundColor: Colors.black,
                   padding: EdgeInsets.zero,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.zero,
@@ -122,7 +122,7 @@ class _ButtonListState extends State<ButtonList> {
                 ),
                 style: ElevatedButton.styleFrom(
                   foregroundColor: Colors.white70,
-                  backgroundColor: Colors.black87,
+                  backgroundColor: Colors.black,
                   padding: EdgeInsets.zero,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.zero,

@@ -1,6 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.alex.app">
 	<uses-permission android:name="android.permission.SET_WALLPAPER" />
 	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+	<uses-permission android:name="android.permission.INTERNET" />
+	<uses-permission android:name="android.permission.QUERY_ALL_PACKAGES"/>
     <application
         android:label="alex"
         android:name="${applicationName}"
@@ -31,5 +33,9 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+		<meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+			android:value="ca-app-pub-2084763273619512~6214800112"/>
+		<!-- android:value="ca-app-pub-3940256099942544~3347511713"/> -->
     </application>
 </manifest>

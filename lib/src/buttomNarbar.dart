@@ -41,7 +41,7 @@ class CustomBottomNavigationBar extends StatelessWidget {
         topRight: Radius.circular(3.0),
       ),
       child: BottomNavigationBar(
-        backgroundColor: Color.fromRGBO(0, 0, 0, 0.7),
+        backgroundColor: Color.fromRGBO(0, 0, 0, 0.9),
         currentIndex: currentIndex,
         onTap: onTabTapped,
         selectedItemColor: Colors.indigo[600], // Color for the selected item
