@@ -14,8 +14,12 @@ class ShareHelper {
 class Menu extends StatefulWidget {
   final int currentIndex;
   final JsonFileManager jsonFileManager;
+  final VoidCallback showInterstitialAd;
 
-  const Menu({required this.currentIndex, required this.jsonFileManager});
+  const Menu(
+      {required this.currentIndex,
+      required this.jsonFileManager,
+      required this.showInterstitialAd});
 
   @override
   _MenuState createState() => _MenuState();
@@ -28,20 +32,19 @@ class _MenuState extends State<Menu> {
       padding: EdgeInsets.zero,
       children: [
         UserAccountsDrawerHeader(
-          decoration: BoxDecoration(color: const Color(0xff000000)),
+          decoration: BoxDecoration(color: Color(0xff131416)),
           accountName: Text(
-            "Amine0x01",
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-            ),
+            " Wallpapers",
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
           ),
-          accountEmail: Text(
-            "amineone@gmail.com",
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
+          accountEmail: Text(""),
+          currentAccountPicture: CircleAvatar(
+            radius: 10,
+            backgroundImage: AssetImage(
+              "assets/icons/drawer.png",
             ),
+            backgroundColor: Colors.black,
           ),
-          currentAccountPicture: FlutterLogo(),
         ),
         ListTile(
           leading: Icon(
@@ -92,6 +95,7 @@ class _MenuState extends State<Menu> {
                 MaterialPageRoute(
                     builder: (context) => Collection(
                           jsonFileManager: widget.jsonFileManager,
+                          showInterstitialAd: widget.showInterstitialAd,
                         )),
               );
             } else {
@@ -122,6 +126,7 @@ class _MenuState extends State<Menu> {
                 MaterialPageRoute(
                     builder: (context) => Favorite(
                           jsonFileManager: widget.jsonFileManager,
+                          showInterstitialAd: widget.showInterstitialAd,
                         )),
               );
             } else {

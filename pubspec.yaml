@@ -74,7 +74,7 @@ flutter:
     - assets/icons/wallpy.png
     - assets/icons/send.png
     - assets/icons/app.png
-    - assets/icons/google-play.png
+    - assets/icons/drawer.png
 
   # To add assets to your application, add an assets section, like this:
   # assets:

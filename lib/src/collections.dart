@@ -11,8 +11,13 @@ import 'buttomNarbar.dart';
 
 class Collection extends StatefulWidget {
   final JsonFileManager jsonFileManager;
+  final VoidCallback showInterstitialAd;
 
-  const Collection({Key? key, required this.jsonFileManager}) : super(key: key);
+  const Collection(
+      {Key? key,
+      required this.jsonFileManager,
+      required this.showInterstitialAd})
+      : super(key: key);
 
   @override
   State<Collection> createState() => _CollectionState();
@@ -157,6 +162,7 @@ class _CollectionState extends State<Collection> {
         child: Menu(
           currentIndex: 1,
           jsonFileManager: widget.jsonFileManager,
+          showInterstitialAd: widget.showInterstitialAd,
         ),
       ),
       body: RefreshIndicator(
@@ -216,6 +222,7 @@ class _CollectionState extends State<Collection> {
                       MaterialPageRoute(
                         builder: (context) => Favorite(
                           jsonFileManager: widget.jsonFileManager,
+                          showInterstitialAd: widget.showInterstitialAd,
                         ),
                       ),
                     );

@@ -9,8 +9,12 @@ import '../main.dart';
 
 class Favorite extends StatefulWidget {
   final JsonFileManager jsonFileManager;
+  final VoidCallback showInterstitialAd;
 
-  const Favorite({super.key, required this.jsonFileManager});
+  const Favorite(
+      {super.key,
+      required this.jsonFileManager,
+      required this.showInterstitialAd});
 
   @override
   State<Favorite> createState() => _FavoriteState();
@@ -70,6 +74,7 @@ class _FavoriteState extends State<Favorite> {
         child: Menu(
           currentIndex: 2,
           jsonFileManager: widget.jsonFileManager,
+          showInterstitialAd: widget.showInterstitialAd,
         ),
       ),
       body: RefreshIndicator(
@@ -111,8 +116,9 @@ class _FavoriteState extends State<Favorite> {
                           context,
                           MaterialPageRoute(
                             builder: (context) => ViewImage(
-                              url: favorites[index],
                               jsonFileManager: widget.jsonFileManager,
+                              url: favorites[index],
+                              showInterstitialAd: widget.showInterstitialAd,
                             ),
                           ),
                         );
@@ -160,6 +166,7 @@ class _FavoriteState extends State<Favorite> {
                       MaterialPageRoute(
                         builder: (context) => Collection(
                           jsonFileManager: widget.jsonFileManager,
+                          showInterstitialAd: widget.showInterstitialAd,
                         ),
                       ),
                     );

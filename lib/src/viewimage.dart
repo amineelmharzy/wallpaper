@@ -7,8 +7,13 @@ import 'package:flutter/material.dart';
 class ViewImage extends StatefulWidget {
   final String url;
   final JsonFileManager jsonFileManager;
+  final VoidCallback showInterstitialAd;
 
-  ViewImage({required this.url, required this.jsonFileManager});
+  ViewImage({
+    required this.url,
+    required this.jsonFileManager,
+    required this.showInterstitialAd,
+  });
 
   @override
   _ViewImageState createState() => _ViewImageState();
@@ -115,6 +120,11 @@ class _ViewImageState extends State<ViewImage> {
                           iconSize: 33,
                           color: Colors.white,
                           onPressed: () {
+                            counter++;
+                            if (counter == 3) {
+                              widget.showInterstitialAd();
+                              counter = 0;
+                            }
                             showDialog(
                               context: context,
                               builder: (BuildContext context) =>

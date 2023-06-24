@@ -131,8 +131,26 @@ class _SplashScreenState extends State<SplashScreen> {
     return Scaffold(
       backgroundColor: Colors.white, // Set your desired background color
       body: Center(
-        child: FlutterLogo(
-            size: 150), // Replace this with your own splash screen UI
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image.asset(
+              'assets/icons/app.png', // Replace 'your_image.png' with the path to your custom image
+              width: 150, // Set the desired width of the image
+              height: 150, // Set the desired height of the image
+            ),
+            SizedBox(
+                height: 16), // Add some spacing between the image and the title
+            Text(
+              'Wallpapers', // Replace 'Your Title' with your desired title text
+              style: TextStyle(
+                fontSize: 24, // Set the desired font size of the title
+                fontWeight:
+                    FontWeight.bold, // Set the desired font weight of the title
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -185,44 +203,44 @@ class _HomepageState extends State<Homepage> {
     });
   }
 
-  // void _createInterstitialAd() {
-  //   InterstitialAd.load(
-  //       adUnitId: "ca-app-pub-2084763273619512/7767818268",
-  //       request: AdRequest(),
-  //       adLoadCallback: InterstitialAdLoadCallback(
-  //         onAdLoaded: (InterstitialAd ad) {
-  //           print('$ad loaded');
-  //           _interstitialAd = ad;
-  //           _interstitialAd!.setImmersiveMode(true);
-  //         },
-  //         onAdFailedToLoad: (LoadAdError error) {
-  //           print('InterstitialAd failed to load: $error.');
-  //         },
-  //       ));
-  // }
+  void _createInterstitialAd() {
+    InterstitialAd.load(
+        adUnitId: "ca-app-pub-2084763273619512/7767818268",
+        request: AdRequest(),
+        adLoadCallback: InterstitialAdLoadCallback(
+          onAdLoaded: (InterstitialAd ad) {
+            print('$ad loaded');
+            _interstitialAd = ad;
+            _interstitialAd!.setImmersiveMode(true);
+          },
+          onAdFailedToLoad: (LoadAdError error) {
+            print('InterstitialAd failed to load: $error.');
+          },
+        ));
+  }
 
-  // void _showInterstitialAd() {
-  //   if (_interstitialAd == null) {
-  //     print('Warning: attempt to show interstitial before loaded.');
-  //     return;
-  //   }
-  //   _interstitialAd!.fullScreenContentCallback = FullScreenContentCallback(
-  //     onAdShowedFullScreenContent: (InterstitialAd ad) =>
-  //         print('ad onAdShowedFullScreenContent.'),
-  //     onAdDismissedFullScreenContent: (InterstitialAd ad) {
-  //       print('$ad onAdDismissedFullScreenContent.');
-  //       ad.dispose();
-  //       _createInterstitialAd();
-  //     },
-  //     onAdFailedToShowFullScreenContent: (InterstitialAd ad, AdError error) {
-  //       print('$ad onAdFailedToShowFullScreenContent: $error');
-  //       ad.dispose();
-  //       _createInterstitialAd();
-  //     },
-  //   );
-  //   _interstitialAd!.show();
-  //   _interstitialAd = null;
-  // }
+  void _showInterstitialAd() {
+    if (_interstitialAd == null) {
+      print('Warning: attempt to show interstitial before loaded.');
+      return;
+    }
+    _interstitialAd!.fullScreenContentCallback = FullScreenContentCallback(
+      onAdShowedFullScreenContent: (InterstitialAd ad) =>
+          print('ad onAdShowedFullScreenContent.'),
+      onAdDismissedFullScreenContent: (InterstitialAd ad) {
+        print('$ad onAdDismissedFullScreenContent.');
+        ad.dispose();
+        _createInterstitialAd();
+      },
+      onAdFailedToShowFullScreenContent: (InterstitialAd ad, AdError error) {
+        print('$ad onAdFailedToShowFullScreenContent: $error');
+        ad.dispose();
+        _createInterstitialAd();
+      },
+    );
+    _interstitialAd!.show();
+    _interstitialAd = null;
+  }
 
   Future<InitializationStatus> _initGoogleMobileAds() {
     // TODO: Initialize Google Mobile Ads SDK
@@ -237,6 +255,7 @@ class _HomepageState extends State<Homepage> {
 
   @override
   void initState() {
+    _createInterstitialAd();
     super.initState();
     readJsonData();
     fetchPexelsImages();
@@ -355,7 +374,11 @@ class _HomepageState extends State<Homepage> {
         automaticallyImplyLeading: true,
       ),
       drawer: Drawer(
-        child: Menu(currentIndex: 0, jsonFileManager: jsonFileManager),
+        child: Menu(
+          currentIndex: 0,
+          jsonFileManager: jsonFileManager,
+          showInterstitialAd: _showInterstitialAd,
+        ),
       ),
       body: RefreshIndicator(
         onRefresh: _refreshData,
@@ -402,13 +425,18 @@ class _HomepageState extends State<Homepage> {
 
                           return GestureDetector(
                             onTap: () {
-                              // _showInterstitialAd();
+                              counter++;
+                              if (counter == 3) {
+                                _showInterstitialAd();
+                                counter = 0;
+                              }
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) => ViewImage(
                                     url: imageUrl,
                                     jsonFileManager: jsonFileManager,
+                                    showInterstitialAd: _showInterstitialAd,
                                   ),
                                   // builder: (context) => viewImage(url: imageUrl),
                                 ),
@@ -476,6 +504,7 @@ class _HomepageState extends State<Homepage> {
                           MaterialPageRoute(
                             builder: (context) => Collection(
                               jsonFileManager: jsonFileManager,
+                              showInterstitialAd: _showInterstitialAd,
                             ),
                           ),
                         );
@@ -486,6 +515,7 @@ class _HomepageState extends State<Homepage> {
                           MaterialPageRoute(
                             builder: (context) => Favorite(
                               jsonFileManager: jsonFileManager,
+                              showInterstitialAd: _showInterstitialAd,
                             ),
                           ),
                         );
