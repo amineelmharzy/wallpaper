@@ -2,17 +2,17 @@ import 'dart:ui';
 import 'package:alex/main.dart';
 import 'package:alex/src/download.dart';
 import 'package:alex/src/wallpaper_options.dart';
+import 'package:applovin_max/applovin_max.dart';
 import 'package:flutter/material.dart';
 
 class ViewImage extends StatefulWidget {
   final String url;
   final JsonFileManager jsonFileManager;
-  final VoidCallback showInterstitialAd;
+  final VoidCallback initializeRewardedAds;
 
   ViewImage({
     required this.url,
-    required this.jsonFileManager,
-    required this.showInterstitialAd,
+    required this.jsonFileManager, required this.initializeRewardedAds,
   });
 
   @override
@@ -42,7 +42,30 @@ class _ViewImageState extends State<ViewImage> {
     }
   }
 
-  void toggleButtonListVisibility() {
+  Future<void>  _showRewardedAd() async {
+    if (rcounter == 0)
+      widget.initializeRewardedAds();
+    rcounter++;
+      if (rcounter == 10) {
+        bool isReady =
+            (await AppLovinMAX.isRewardedAdReady(rewarded_ad_unit_id))!;
+        if (isReady) {
+          AppLovinMAX.showRewardedAd(rewarded_ad_unit_id);
+        }
+        rcounter = 0;
+      }
+      MaxAdView(
+          adUnitId: rewarded_ad_unit_id,
+          adFormat: AdFormat.mrec,
+          listener: AdViewAdListener(
+              onAdLoadedCallback: (ad) {},
+              onAdLoadFailedCallback: (adUnitId, error) {},
+              onAdClickedCallback: (ad) {},
+              onAdExpandedCallback: (ad) {},
+              onAdCollapsedCallback: (ad) {}));
+  }
+  void  toggleButtonListVisibility() {
+    _showRewardedAd();
     setState(() {
       isButtonListVisible = !isButtonListVisible;
     });
@@ -119,12 +142,29 @@ class _ViewImageState extends State<ViewImage> {
                           icon: Icon(Icons.arrow_downward_rounded),
                           iconSize: 33,
                           color: Colors.white,
-                          onPressed: () {
-                            counter++;
-                            if (counter == 3) {
-                              widget.showInterstitialAd();
-                              counter = 0;
+                          onPressed: () async {
+                            if (rcounter == 0)
+                              widget.initializeRewardedAds();
+                            rcounter++;
+                            if (rcounter == 5) {
+                              bool isReady =
+                                  (await AppLovinMAX.isRewardedAdReady(
+                                      rewarded_ad_unit_id))!;
+                              if (isReady) {
+                                AppLovinMAX.showRewardedAd(rewarded_ad_unit_id);
+                              }
+                              rcounter = 0;
                             }
+                            MaxAdView(
+                                adUnitId: rewarded_ad_unit_id,
+                                adFormat: AdFormat.mrec,
+                                listener: AdViewAdListener(
+                                    onAdLoadedCallback: (ad) {},
+                                    onAdLoadFailedCallback:
+                                        (adUnitId, error) {},
+                                    onAdClickedCallback: (ad) {},
+                                    onAdExpandedCallback: (ad) {},
+                                    onAdCollapsedCallback: (ad) {}));
                             showDialog(
                               context: context,
                               builder: (BuildContext context) =>

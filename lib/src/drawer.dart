@@ -14,12 +14,12 @@ class ShareHelper {
 class Menu extends StatefulWidget {
   final int currentIndex;
   final JsonFileManager jsonFileManager;
-  final VoidCallback showInterstitialAd;
+  final VoidCallback  initializeRewardedAds;
 
-  const Menu(
-      {required this.currentIndex,
-      required this.jsonFileManager,
-      required this.showInterstitialAd});
+  const Menu({
+    required this.currentIndex,
+    required this.jsonFileManager, required this.initializeRewardedAds,
+  });
 
   @override
   _MenuState createState() => _MenuState();
@@ -94,8 +94,7 @@ class _MenuState extends State<Menu> {
                 context,
                 MaterialPageRoute(
                     builder: (context) => Collection(
-                          jsonFileManager: widget.jsonFileManager,
-                          showInterstitialAd: widget.showInterstitialAd,
+                          jsonFileManager: widget.jsonFileManager, initializeRewardedAds:  widget.initializeRewardedAds,
                         )),
               );
             } else {
@@ -125,8 +124,7 @@ class _MenuState extends State<Menu> {
                 context,
                 MaterialPageRoute(
                     builder: (context) => Favorite(
-                          jsonFileManager: widget.jsonFileManager,
-                          showInterstitialAd: widget.showInterstitialAd,
+                          jsonFileManager: widget.jsonFileManager, initializeRewardedAds: widget.initializeRewardedAds,
                         )),
               );
             } else {
@@ -155,7 +153,7 @@ class _MenuState extends State<Menu> {
             ),
           ),
           onTap: () {
-            String message = "Applink";
+            String message = "https://play.google.com/store/apps/details?id=com.wallpapers.app";
             ShareHelper.shareMessage(message);
             Navigator.pop(context);
           },
@@ -179,8 +177,8 @@ class _MenuState extends State<Menu> {
           onTap: () async {
             Navigator.pop(context);
             if (await canLaunch(
-                "https://sites.google.com/view/amine-dev/home")) {
-              await launch("https://sites.google.com/view/amine-dev/home");
+                "https://sites.google.com/view/aminepro-privacy-policy1/home")) {
+              await launch("https://sites.google.com/view/aminepro-privacy-policy1/home");
             } else {
               throw Exception('Could not launch url');
             }

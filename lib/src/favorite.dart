@@ -1,4 +1,5 @@
 import 'package:alex/src/collections.dart';
+import 'package:applovin_max/applovin_max.dart';
 import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
 import 'drawer.dart';
@@ -9,12 +10,12 @@ import '../main.dart';
 
 class Favorite extends StatefulWidget {
   final JsonFileManager jsonFileManager;
-  final VoidCallback showInterstitialAd;
+  final VoidCallback  initializeRewardedAds;
 
-  const Favorite(
-      {super.key,
-      required this.jsonFileManager,
-      required this.showInterstitialAd});
+  const Favorite({
+    super.key,
+    required this.jsonFileManager, required this.initializeRewardedAds,
+  });
 
   @override
   State<Favorite> createState() => _FavoriteState();
@@ -73,109 +74,122 @@ class _FavoriteState extends State<Favorite> {
       drawer: Drawer(
         child: Menu(
           currentIndex: 2,
-          jsonFileManager: widget.jsonFileManager,
-          showInterstitialAd: widget.showInterstitialAd,
+          jsonFileManager: widget.jsonFileManager, initializeRewardedAds: widget.initializeRewardedAds
         ),
       ),
       body: RefreshIndicator(
         onRefresh: _refreshData,
-        child: Stack(
-          children: [
-            if (isLoading)
-              Center(
-                child: CircularProgressIndicator(
-                  color: Colors.indigo[600],
-                ),
-              )
-            else if (!hasInternet || favorites.isEmpty)
-              Center(
-                child: Text(
-                  !hasInternet ? 'No internet connection' : "No Favorites",
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              )
-            else
-              Container(
-                margin: EdgeInsets.all(12),
-                child: GridView.builder(
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 10,
-                    mainAxisSpacing: 12,
-                    childAspectRatio: 0.7,
-                  ),
-                  itemCount: favorites.length,
-                  itemBuilder: (context, index) {
-                    return GestureDetector(
-                      onTap: () {
-                        // Handle tap event
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => ViewImage(
-                              jsonFileManager: widget.jsonFileManager,
-                              url: favorites[index],
-                              showInterstitialAd: widget.showInterstitialAd,
-                            ),
-                          ),
-                        );
-                      },
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.transparent,
-                          borderRadius: BorderRadius.all(
-                            Radius.circular(15),
-                          ),
-                        ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.all(
-                            Radius.circular(15),
-                          ),
-                          child: FadeInImage.memoryNetwork(
-                            placeholder: kTransparentImage,
-                            image: favorites[index],
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                      ),
-                    );
-                  },
+        child: Stack(children: [
+          if (isLoading)
+            Center(
+              child: CircularProgressIndicator(
+                color: Colors.indigo[600],
+              ),
+            )
+          else if (!hasInternet || favorites.isEmpty)
+            Center(
+              child: Text(
+                !hasInternet ? 'No internet connection' : "No Favorites",
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
-            Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              child: CustomBottomNavigationBar(
-                currentIndex: 2,
-                onTabTapped: (int index) {
-                  if (index == 0) {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => Homepage(),
-                      ),
-                    );
-                  }
-                  if (index == 1) {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => Collection(
-                          jsonFileManager: widget.jsonFileManager,
-                          showInterstitialAd: widget.showInterstitialAd,
+            )
+          else
+            Container(
+              margin: EdgeInsets.all(12),
+              child: GridView.builder(
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 10,
+                  mainAxisSpacing: 12,
+                  childAspectRatio: 0.7,
+                ),
+                itemCount: favorites.length,
+                itemBuilder: (context, index) {
+                  return GestureDetector(
+                    onTap: () {
+                      // Handle tap event
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ViewImage(
+                            jsonFileManager: widget.jsonFileManager,
+                            url: favorites[index], initializeRewardedAds: widget.initializeRewardedAds,
+                          ),
+                        ),
+                      );
+                    },
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.transparent,
+                        borderRadius: BorderRadius.all(
+                          Radius.circular(15),
                         ),
                       ),
-                    );
-                  }
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.all(
+                          Radius.circular(15),
+                        ),
+                        child: FadeInImage.memoryNetwork(
+                          placeholder: kTransparentImage,
+                          image: favorites[index],
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    ),
+                  );
                 },
               ),
             ),
-          ],
-        ),
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: Column(
+              children: [
+                Container(
+                  child: MaxAdView(
+                    adUnitId: "0c860e2b62640f75",
+                    adFormat: AdFormat.banner,
+                    listener: AdViewAdListener(
+                      onAdLoadedCallback: (ad) {},
+                      onAdLoadFailedCallback: (adUnitId, error) {},
+                      onAdClickedCallback: (ad) {},
+                      onAdExpandedCallback: (ad) {},
+                      onAdCollapsedCallback: (ad) {},
+                    ),
+                  ),
+                ),
+                CustomBottomNavigationBar(
+                  currentIndex: 2,
+                  onTabTapped: (int index) {
+                    if (index == 0) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => Homepage(),
+                        ),
+                      );
+                    }
+                    if (index == 1) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => Collection(
+                            jsonFileManager: widget.jsonFileManager,
+                            initializeRewardedAds: widget.initializeRewardedAds,
+                          ),
+                        ),
+                      );
+                    }
+                  },
+                ),
+              ],
+            ),
+          ),
+        ]),
       ),
     );
   }

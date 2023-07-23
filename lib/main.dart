@@ -7,18 +7,24 @@ import 'package:alex/src/favorite.dart';
 import 'package:alex/src/viewimage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:applovin_max/applovin_max.dart';
+import 'dart:math' as m;
 
 const String pexelsApiKey =
     'nhyaYthSvv68nZ0kf1YACx7L5u2FyuR98m8ekRfttnO4Y0W4J0Ix4wJT';
 
 List<String> favorites = [];
-int counter = 0;
+int icounter = 0;
+int rcounter = 0;
+
+
+String  banner_ad_unit_id = "0c860e2b62640f75";
+String  interstitial_ad_unit_id= "88a0c7db362c4821";
+String  rewarded_ad_unit_id = "787b1f73ab1cc820";
 
 class PexelsApiClient {
   static const String _baseUrl = 'https://api.pexels.com/v1';
@@ -79,8 +85,10 @@ class JsonFileManager {
   }
 }
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  Map? sdkConfiguration = await AppLovinMAX.initialize(
+      "8N5SdrgtH5et2LBTO3iv_kVHruDvchz7Z58claQA05fwrpSUeVsemsTaMHf6o33DSH0mZlaGqpWcFamTLoUTLK");
   runApp(MyApp());
 }
 
@@ -175,10 +183,11 @@ class _HomepageState extends State<Homepage> {
   late String searchValue;
   ScrollController _scrollController = ScrollController();
   Timer? _debounce;
-  BannerAd? _bannerAd;
-  InterstitialAd? _interstitialAd;
-
+  var _interstitialRetryAttempt = 0;
+  var _rewardedAdRetryAttempt = 0;
   _HomepageState(this.searchValue);
+
+// SDK is initialized, start loading ads
 
   void readJsonData() async {
     List<String> data = await jsonFileManager.readJsonData();
@@ -203,59 +212,78 @@ class _HomepageState extends State<Homepage> {
     });
   }
 
-  void _createInterstitialAd() {
-    InterstitialAd.load(
-        adUnitId: "ca-app-pub-2084763273619512/7767818268",
-        request: AdRequest(),
-        adLoadCallback: InterstitialAdLoadCallback(
-          onAdLoaded: (InterstitialAd ad) {
-            print('$ad loaded');
-            _interstitialAd = ad;
-            _interstitialAd!.setImmersiveMode(true);
-          },
-          onAdFailedToLoad: (LoadAdError error) {
-            print('InterstitialAd failed to load: $error.');
-          },
-        ));
-  }
+  void initializeInterstitialAds() {
+    AppLovinMAX.setInterstitialListener(InterstitialListener(
+      onAdLoadedCallback: (ad) {
+        // Interstitial ad is ready to be shown. AppLovinMAX.isInterstitialReady(_interstitial_ad_unit_id) will now return 'true'
+        print('Interstitial ad loaded from ' + ad.networkName);
 
-  void _showInterstitialAd() {
-    if (_interstitialAd == null) {
-      print('Warning: attempt to show interstitial before loaded.');
-      return;
-    }
-    _interstitialAd!.fullScreenContentCallback = FullScreenContentCallback(
-      onAdShowedFullScreenContent: (InterstitialAd ad) =>
-          print('ad onAdShowedFullScreenContent.'),
-      onAdDismissedFullScreenContent: (InterstitialAd ad) {
-        print('$ad onAdDismissedFullScreenContent.');
-        ad.dispose();
-        _createInterstitialAd();
+        // Reset retry attempt
+        _interstitialRetryAttempt = 0;
       },
-      onAdFailedToShowFullScreenContent: (InterstitialAd ad, AdError error) {
-        print('$ad onAdFailedToShowFullScreenContent: $error');
-        ad.dispose();
-        _createInterstitialAd();
+      onAdLoadFailedCallback: (adUnitId, error) {
+        // Interstitial ad failed to load
+        // We recommend retrying with exponentially higher delays up to a maximum delay (in this case 64 seconds)
+        _interstitialRetryAttempt = _interstitialRetryAttempt + 1;
+
+        int retryDelay = m.pow(2, m.min(6, _interstitialRetryAttempt)).toInt();
+
+        print('Interstitial ad failed to load with code ' +
+            error.code.toString() +
+            ' - retrying in ' +
+            retryDelay.toString() +
+            's');
+
+        Future.delayed(Duration(milliseconds: retryDelay * 1000), () {
+          AppLovinMAX.loadInterstitial(interstitial_ad_unit_id);
+        });
       },
-    );
-    _interstitialAd!.show();
-    _interstitialAd = null;
+      onAdDisplayedCallback: (ad) {},
+      onAdDisplayFailedCallback: (ad, error) {},
+      onAdClickedCallback: (ad) {},
+      onAdHiddenCallback: (ad) {},
+    ));
+
+    // Load the first interstitial
+    AppLovinMAX.loadInterstitial(interstitial_ad_unit_id);
   }
 
-  Future<InitializationStatus> _initGoogleMobileAds() {
-    // TODO: Initialize Google Mobile Ads SDK
-    return MobileAds.instance.initialize();
-  }
+  void initializeRewardedAds() {
+    AppLovinMAX.setRewardedAdListener(RewardedAdListener(
+        onAdLoadedCallback: (ad) {
+          // Rewarded ad is ready to be shown. AppLovinMAX.isRewardedAdReady(_rewarded_ad_unit_id) will now return 'true'
+          print('Rewarded ad loaded from ' + ad.networkName);
 
-  @override
-  void dispose() {
-    _bannerAd?.dispose();
-    super.dispose();
+          // Reset retry attempt
+          _rewardedAdRetryAttempt = 0;
+        },
+        onAdLoadFailedCallback: (adUnitId, error) {
+          // Rewarded ad failed to load
+          // We recommend retrying with exponentially higher delays up to a maximum delay (in this case 64 seconds)
+          _rewardedAdRetryAttempt = _rewardedAdRetryAttempt + 1;
+
+          int retryDelay = m.pow(2, m.min(6, _rewardedAdRetryAttempt)).toInt();
+          print('Rewarded ad failed to load with code ' +
+              error.code.toString() +
+              ' - retrying in ' +
+              retryDelay.toString() +
+              's');
+
+          Future.delayed(Duration(milliseconds: retryDelay * 1000), () {
+            AppLovinMAX.loadRewardedAd(rewarded_ad_unit_id);
+          });
+        },
+        onAdDisplayedCallback: (ad) {},
+        onAdDisplayFailedCallback: (ad, error) {},
+        onAdClickedCallback: (ad) {},
+        onAdHiddenCallback: (ad) {},
+        onAdReceivedRewardCallback: (ad, reward) {}));
+
+    AppLovinMAX.loadRewardedAd(rewarded_ad_unit_id);
   }
 
   @override
   void initState() {
-    _createInterstitialAd();
     super.initState();
     readJsonData();
     fetchPexelsImages();
@@ -265,23 +293,6 @@ class _HomepageState extends State<Homepage> {
         fetchPexelsImages();
       }
     });
-    BannerAd(
-      adUnitId: 'ca-app-pub-2084763273619512/9437528124',
-      request: AdRequest(),
-      size: AdSize.banner,
-      listener: BannerAdListener(
-        onAdLoaded: (ad) {
-          setState(() {
-            _bannerAd = ad as BannerAd;
-          });
-        },
-        onAdFailedToLoad: (ad, err) {
-          print('Failed to load a banner ad: ${err.message}');
-          ad.dispose();
-        },
-      ),
-    ).load();
-    // _createInterstitialAd();
   }
 
   Future<void> fetchPexelsImages() async {
@@ -376,8 +387,7 @@ class _HomepageState extends State<Homepage> {
       drawer: Drawer(
         child: Menu(
           currentIndex: 0,
-          jsonFileManager: jsonFileManager,
-          showInterstitialAd: _showInterstitialAd,
+          jsonFileManager: jsonFileManager, initializeRewardedAds: initializeRewardedAds,
         ),
       ),
       body: RefreshIndicator(
@@ -388,7 +398,7 @@ class _HomepageState extends State<Homepage> {
               Column(
                 children: [
                   Container(
-                    height: 50,
+                    height: 45,
                     margin: EdgeInsets.only(top: 10, left: 20, right: 20),
                     child: CupertinoTextField(
                       prefix: Padding(
@@ -424,19 +434,37 @@ class _HomepageState extends State<Homepage> {
                           final imageUrl = _apiImages[index];
 
                           return GestureDetector(
-                            onTap: () {
-                              counter++;
-                              if (counter == 3) {
-                                _showInterstitialAd();
-                                counter = 0;
+                            onTap: () async {
+                              if (icounter == 0)
+                                initializeInterstitialAds();
+                              icounter++;
+                              if (icounter == 5) {
+                                bool isReady =
+                                    (await AppLovinMAX.isInterstitialReady(
+                                        interstitial_ad_unit_id))!;
+                                if (isReady) {
+                                  AppLovinMAX.showInterstitial(
+                                      interstitial_ad_unit_id);
+                                }
+                                icounter = 0;
                               }
+                              MaxAdView(
+                                  adUnitId: interstitial_ad_unit_id,
+                                  adFormat: AdFormat.mrec,
+                                  listener: AdViewAdListener(
+                                      onAdLoadedCallback: (ad) {},
+                                      onAdLoadFailedCallback:
+                                          (adUnitId, error) {},
+                                      onAdClickedCallback: (ad) {},
+                                      onAdExpandedCallback: (ad) {},
+                                      onAdCollapsedCallback: (ad) {}));
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) => ViewImage(
                                     url: imageUrl,
                                     jsonFileManager: jsonFileManager,
-                                    showInterstitialAd: _showInterstitialAd,
+                                    initializeRewardedAds: initializeRewardedAds,
                                   ),
                                   // builder: (context) => viewImage(url: imageUrl),
                                 ),
@@ -486,15 +514,17 @@ class _HomepageState extends State<Homepage> {
                       ),
                     ),
                   ),
-                  if (_bannerAd != null)
-                    Align(
-                      alignment: Alignment.bottomCenter,
-                      child: Container(
-                        width: _bannerAd!.size.width.toDouble(),
-                        height: _bannerAd!.size.height.toDouble(),
-                        child: AdWidget(ad: _bannerAd!),
-                      ),
-                    ),
+                  Container(
+                    child: MaxAdView(
+                        adUnitId: banner_ad_unit_id,
+                        adFormat: AdFormat.banner,
+                        listener: AdViewAdListener(
+                            onAdLoadedCallback: (ad) {},
+                            onAdLoadFailedCallback: (adUnitId, error) {},
+                            onAdClickedCallback: (ad) {},
+                            onAdExpandedCallback: (ad) {},
+                            onAdCollapsedCallback: (ad) {})),
+                  ),
                   CustomBottomNavigationBar(
                     currentIndex: 0,
                     onTabTapped: (int index) {
@@ -503,8 +533,7 @@ class _HomepageState extends State<Homepage> {
                           context,
                           MaterialPageRoute(
                             builder: (context) => Collection(
-                              jsonFileManager: jsonFileManager,
-                              showInterstitialAd: _showInterstitialAd,
+                              jsonFileManager: jsonFileManager, initializeRewardedAds: initializeRewardedAds,
                             ),
                           ),
                         );
@@ -514,8 +543,8 @@ class _HomepageState extends State<Homepage> {
                           context,
                           MaterialPageRoute(
                             builder: (context) => Favorite(
-                              jsonFileManager: jsonFileManager,
-                              showInterstitialAd: _showInterstitialAd,
+                              jsonFileManager: jsonFileManager, initializeRewardedAds: initializeRewardedAds,
+
                             ),
                           ),
                         );
