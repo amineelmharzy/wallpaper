@@ -22,9 +22,9 @@ int icounter = 0;
 int rcounter = 0;
 
 
-String  banner_ad_unit_id = "0c860e2b62640f75";
-String  interstitial_ad_unit_id= "88a0c7db362c4821";
-String  rewarded_ad_unit_id = "787b1f73ab1cc820";
+String  banner_ad_unit_id = "248e1c93d095f543";
+String  interstitial_ad_unit_id= "248e1c93d095f543";
+String  rewarded_ad_unit_id = "248e1c93d095f543";
 
 class PexelsApiClient {
   static const String _baseUrl = 'https://api.pexels.com/v1';
@@ -514,7 +514,7 @@ class _HomepageState extends State<Homepage> {
                       ),
                     ),
                   ),
-                  Container(
+                   Container(
                     child: MaxAdView(
                         adUnitId: banner_ad_unit_id,
                         adFormat: AdFormat.banner,
@@ -544,7 +544,6 @@ class _HomepageState extends State<Homepage> {
                           MaterialPageRoute(
                             builder: (context) => Favorite(
                               jsonFileManager: jsonFileManager, initializeRewardedAds: initializeRewardedAds,
-
                             ),
                           ),
                         );

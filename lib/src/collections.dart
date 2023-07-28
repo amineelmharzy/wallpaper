@@ -31,7 +31,7 @@ class _CollectionState extends State<Collection> {
     "https://images.pexels.com/photos/2559484/pexels-photo-2559484.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
     "https://images.pexels.com/photos/1274260/pexels-photo-1274260.jpeg?auto=compress&cs=tinysrgb&w=1600",
     "https://images.pexels.com/photos/333525/pexels-photo-333525.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    "https://images.pexels.com/photos/6153741/pexels-photo-6153741.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
+    "https://images.pexels.com/photos/2962282/pexels-photo-2962282.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
   ];
 
   List<String> titles = [
@@ -41,7 +41,7 @@ class _CollectionState extends State<Collection> {
     "Sky",
     "Space",
     "Travel",
-    "Tech"
+    "City"
   ];
   bool isLoading = true;
   bool hasInternet = true; // Replace with your internet connectivity logic

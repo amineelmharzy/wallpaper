@@ -153,7 +153,7 @@ class _MenuState extends State<Menu> {
             ),
           ),
           onTap: () {
-            String message = "https://play.google.com/store/apps/details?id=com.wallpapers.app";
+            String message = "https://play.google.com/store/apps/details?id=com.amine.all.wallpapers.app";
             ShareHelper.shareMessage(message);
             Navigator.pop(context);
           },
